@@ -258,6 +258,12 @@ func roll_dice(values: Array) -> Array:
 	
 	dice_rolled.emit(game_state["dice_values"])
 	print("Remaining moves: ", game_state["remaining_moves"])
+
+	# If no legal moves exist immediately after roll, auto-end turn
+	if not has_legal_moves():
+		print("No legal moves available after roll - auto-ending turn.")
+		end_turn()
+		return game_state["dice_values"]
 	
 	return game_state["dice_values"]
 

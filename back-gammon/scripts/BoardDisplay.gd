@@ -272,6 +272,13 @@ func _draw_status() -> void:
 		var msg = "Selected: Point " + str(selected_point + 1) + " | Available moves: " + str(available_moves.size())
 		draw_string(ThemeDB.fallback_font, Vector2(board_position.x, status_y + 25), 
 				   msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.YELLOW)
+	elif bar_selected:
+		# Show dice available for re-entry when bar is selected
+		var dice_vals = game_manager.get_game_state().get("remaining_moves", [])
+		var dice_str = ", ".join(dice_vals.map(func(v): return str(v)))
+		var msg2 = "Bar selected: re-enter using dice [" + dice_str + "]"
+		draw_string(ThemeDB.fallback_font, Vector2(board_position.x, status_y + 25), 
+			   msg2, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.YELLOW)
 
 
 # ============================================================================
@@ -316,8 +323,11 @@ func _handle_click(click_pos: Vector2) -> void:
 	# Check if clicked on a point
 	if closest_point >= 0 and closest_dist < 40:
 		if bar_selected and selected_point == -1:
-			# Bar is selected; attempt move from bar to this point
-			_try_move(-1, closest_point)
+			# Bar is selected; only allow moves to highlighted legal destinations
+			if closest_point in available_moves:
+				_try_move(-1, closest_point)
+			else:
+				print("Cannot move to that point from bar")
 			return
 		elif selected_point == -1:
 			# No selection yet - try to select this point
