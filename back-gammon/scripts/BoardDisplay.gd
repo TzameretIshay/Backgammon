@@ -28,6 +28,7 @@ var bar_position: Vector2 = Vector2.ZERO
 
 # Game state cache
 var game_state: Dictionary = {}
+var bar_selected: bool = false  # Whether bar is the active selection
 
 # Move selection state
 var selected_point: int = -1  # Currently selected point (-1 = none)
@@ -196,7 +197,8 @@ func _draw_available_moves() -> void:
 	# Highlight the source point
 	if selected_point == -1:
 		# Bar highlight
-		var bar_pos = bar_position - Vector2(40, 0) if game_state.get("current_player", 0) == 0 else bar_position + Vector2(40, 0)
+		var current = game_manager.get_game_state().get("current_player", 0)
+		var bar_pos = bar_position - Vector2(40, 0) if current == 0 else bar_position + Vector2(40, 0)
 		draw_circle(bar_pos, checker_radius + 6, Color.YELLOW, false, 3.0)
 	elif selected_point >= 0 and selected_point < point_positions.size():
 		draw_circle(point_positions[selected_point], checker_radius + 5, Color.YELLOW, false, 3.0)
@@ -290,13 +292,17 @@ func _handle_click(click_pos: Vector2) -> void:
 	# Check bar hit zones first (white on left, black on right of bar)
 	var white_bar_pos = bar_position - Vector2(40, 0)
 	var black_bar_pos = bar_position + Vector2(40, 0)
-	var bar_threshold = 35.0
+	var bar_threshold = 70.0
 	var current_player = game_manager.game_state["current_player"]
 	if current_player == 0 and click_pos.distance_to(white_bar_pos) < bar_threshold and game_manager.game_state["bar"]["white"] > 0:
+		print("Selecting from bar (white)")
 		_select_point(-1)
+		bar_selected = true
 		return
 	if current_player == 1 and click_pos.distance_to(black_bar_pos) < bar_threshold and game_manager.game_state["bar"]["black"] > 0:
+		print("Selecting from bar (black)")
 		_select_point(-1)
+		bar_selected = true
 		return
 	
 	for i in range(24):
@@ -309,7 +315,11 @@ func _handle_click(click_pos: Vector2) -> void:
 	
 	# Check if clicked on a point
 	if closest_point >= 0 and closest_dist < 40:
-		if selected_point == -1:
+		if bar_selected and selected_point == -1:
+			# Bar is selected; attempt move from bar to this point
+			_try_move(-1, closest_point)
+			return
+		elif selected_point == -1:
 			# No selection yet - try to select this point
 			_select_point(closest_point)
 		elif selected_point == closest_point:
@@ -322,7 +332,9 @@ func _handle_click(click_pos: Vector2) -> void:
 
 func _select_point(point: int) -> void:
 	"""Select a point to see available moves."""
-	var current_player = game_manager.game_state["current_player"]
+	# Refresh local state to stay in sync
+	game_state = game_manager.get_game_state().duplicate(true)
+	var current_player = game_state["current_player"]
 	var point_color = game_manager.get_point_color(point) if point >= 0 else current_player
 
 	# Bar selection: ensure current player has pieces on bar
@@ -339,9 +351,11 @@ func _select_point(point: int) -> void:
 	
 	selected_point = point
 	available_moves = game_manager.get_legal_moves().filter(func(m): return m[0] == point)
-	
+
 	# Extract just the destination points
 	available_moves = available_moves.map(func(m): return m[1])
+	print("Selected point ", point, " with ", available_moves.size(), " available moves")
+	queue_redraw()
 	
 	print("Selected point ", point, " with ", available_moves.size(), " available moves")
 	queue_redraw()
@@ -351,6 +365,26 @@ func _deselect_point() -> void:
 	"""Deselect current point."""
 	selected_point = -1
 	available_moves = []
+	bar_selected = false
+	queue_redraw()
+
+
+func _auto_select_bar_if_needed() -> void:
+	"""If current player has checkers on bar, auto-select bar and highlight legal re-entries."""
+	if not game_manager:
+		return
+	var state = game_manager.get_game_state()
+	if state.is_empty():
+		return
+	var current = state.get("current_player", 0)
+	var bar_key = "white" if current == 0 else "black"
+	if state["bar"].get(bar_key, 0) <= 0:
+		return
+
+	selected_point = -1
+	bar_selected = true
+	available_moves = game_manager.get_legal_moves().filter(func(m): return m[0] == -1)
+	available_moves = available_moves.map(func(m): return m[1])
 	queue_redraw()
 
 
@@ -374,6 +408,7 @@ func _on_game_started(state: Dictionary) -> void:
 	print("_on_game_started called with state keys: ", state.keys())
 	game_state = state.duplicate(true)
 	_deselect_point()
+	_auto_select_bar_if_needed()
 	queue_redraw()
 
 
@@ -386,6 +421,8 @@ func _on_move_applied(from: int, to: int, color: int) -> void:
 
 func _on_dice_rolled(values: Array) -> void:
 	"""Update when dice are rolled."""
+	game_state = game_manager.get_game_state().duplicate(true)
+	_auto_select_bar_if_needed()
 	queue_redraw()
 
 
@@ -393,6 +430,7 @@ func _on_turn_ended(next_player: int) -> void:
 	"""Update when turn ends."""
 	game_state = game_manager.get_game_state().duplicate(true)
 	_deselect_point()
+	_auto_select_bar_if_needed()
 	queue_redraw()
 
 

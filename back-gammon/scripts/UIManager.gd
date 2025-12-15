@@ -211,6 +211,12 @@ func _update_buttons() -> void:
 func _on_game_started(state: Dictionary) -> void:
 	"""Update when game starts."""
 	print("Game started signal received.")
+	# Show opening roll results if available
+	if state.has("opening_rolls") and state["opening_rolls"].size() == 2:
+		var white_roll = state["opening_rolls"].get("white", 0)
+		var black_roll = state["opening_rolls"].get("black", 0)
+		var winner_name = "White" if state["current_player"] == 0 else "Black"
+		dice_result_label.text = "Opening: W:%d B:%d | %s starts!" % [white_roll, black_roll, winner_name]
 	_update_ui()
 
 

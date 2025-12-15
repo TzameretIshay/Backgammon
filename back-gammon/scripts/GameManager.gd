@@ -105,9 +105,24 @@ func new_game() -> void:
 		"opening_rolls": {}  # Track opening roll for each player
 	}
 	
-	turn_state = TurnState.OPENING_ROLL
+	# Auto-perform opening rolls
+	var white_roll = 0
+	var black_roll = 0
+	while white_roll == black_roll:
+		white_roll = randi_range(1, 6)
+		black_roll = randi_range(1, 6)
+		if white_roll == black_roll:
+			print("Opening rolls tied (%d vs %d) - rerolling..." % [white_roll, black_roll])
+	
+	print("Opening rolls: White=%d, Black=%d" % [white_roll, black_roll])
+	var winner = white_player if white_roll > black_roll else black_player
+	game_state["current_player"] = winner
+	game_state["opening_rolls"] = {"white": white_roll, "black": black_roll}
+	print("Opening roll winner: ", _player_color(winner), " starts first!")
+	
+	turn_state = TurnState.WAITING_FOR_ROLL
 	game_started.emit(game_state)
-	print("Game initialized. Both players must roll for opening.")
+	print("Game initialized. %s goes first - roll dice to begin." % _player_color(winner))
 
 
 ## Initializes the standard backgammon starting position.
@@ -300,6 +315,13 @@ func request_move(from_point: int, to_point: int) -> bool:
 	# If no more moves, end turn
 	if game_state["remaining_moves"].is_empty():
 		end_turn()
+		return true
+	
+	# Auto-end turn if moves remain but no legal moves available
+	if not game_state["remaining_moves"].is_empty() and not has_legal_moves():
+		print("No legal moves available with remaining dice - auto-ending turn.")
+		end_turn()
+		return true
 	
 	return true
 
