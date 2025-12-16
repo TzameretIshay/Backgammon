@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8x1vj9qp3wts"]
+
+[ext_resource type="Script" path="res://scripts/Launcher.gd" id="1_launcher"]
+[ext_resource type="PackedScene" uid="uid://bqx8vj2p5qw7s" path="res://scenes/MainMenu.tscn" id="2_menu"]
+[ext_resource type="PackedScene" uid="uid://chnxdknnr78rq" path="res://scenes/Main.tscn" id="3_game"]
+
+[node name="Launcher" type="Node"]
+script = ExtResource("1_launcher")
+
+[node name="MainMenu" parent="." instance=ExtResource("2_menu")]
+
+[node name="Game" parent="." instance=ExtResource("3_game")]
+visible = false

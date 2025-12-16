@@ -1,105 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://c33nxcapnmv7n"]
+[gd_scene load_steps=5 format=3 uid="uid://chnxdknnr78rq"]
 
-[ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_4p9pq"]
-[ext_resource type="Script" path="res://scripts/BoardDisplay.gd" id="2_qo1xw"]
-[ext_resource type="Script" path="res://scripts/UIManager.gd" id="3_uitm"]
+[ext_resource type="Script" path="res://scripts/GameManager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Board.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/Dice.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/UI.tscn" id="4"]
 
 [node name="Main" type="Node"]
-script = ExtResource("1_4p9pq")
+script = ExtResource("1")
+board_path = NodePath("Board")
+dice_path = NodePath("DiceUI")
+ui_path = NodePath("UI")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="Board" parent="." instance=ExtResource("2")]
 
-[node name="BoardDisplay" type="Node2D" parent="UI"]
-script = ExtResource("2_qo1xw")
+[node name="UI" parent="." instance=ExtResource("4")]
 
-[node name="UIManager" type="Control" parent="UI"]
-layout_mode = 3
-anchors_left = 0.0
-anchors_top = 0.0
-anchors_right = 1.0
-anchors_bottom = 1.0
-script = ExtResource("3_uitm")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/UIManager"]
-anchors_left = 0.65
-anchors_top = 0.0
-anchors_right = 1.0
-anchors_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-size_flags_horizontal = 0
-size_flags_vertical = 0
-
-[node name="Title" type="Label" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "BACKGAMMON"
-theme_override_font_sizes/font_size = 24
-alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 10)
-
-[node name="StatusLabel" type="Label" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Press 'New Game' to start"
-theme_override_font_sizes/font_size = 14
-
-[node name="HSeparator2" type="HSeparator" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 10)
-
-[node name="NewGameBtn" type="Button" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "New Game"
-size_flags_vertical = 0
-
-[node name="RollDiceBtn" type="Button" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Roll Dice"
-disabled = true
-size_flags_vertical = 0
-
-[node name="DiceResultLabel" type="Label" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Roll result: --"
-theme_override_font_sizes/font_size = 12
-
-[node name="HSeparator3" type="HSeparator" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 10)
-
-[node name="LegalMovesLabel" type="Label" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Legal moves:"
-theme_override_font_sizes/font_size = 12
-
-[node name="LegalMovesList" type="ItemList" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="HSeparator4" type="HSeparator" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 10)
-
-[node name="EndTurnBtn" type="Button" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "End Turn"
-disabled = true
-size_flags_vertical = 0
-
-[node name="UndoBtn" type="Button" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Undo Move"
-size_flags_vertical = 0
-
-[node name="ResetBtn" type="Button" parent="UI/UIManager/VBoxContainer"]
-layout_mode = 2
-text = "Reset Game"
-size_flags_vertical = 0
+[node name="DiceUI" parent="." instance=ExtResource("3")]
