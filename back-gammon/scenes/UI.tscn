@@ -36,7 +36,33 @@ text = "Player: --"
 [node name="RollLabel" type="Label" parent="VBox"]
 text = "Dice: --"
 
+[node name="PipCountLabel" type="Label" parent="VBox"]
+text = "Pip Count: White 167 | Black 167"
+theme_override_font_sizes/font_size = 14
+
+[node name="MatchScoreLabel" type="Label" parent="VBox"]
+text = "Match: White 0 | Black 0 (to 5)"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+
+[node name="StatsLabel" type="Label" parent="VBox"]
+text = "Stats (session)"
+theme_override_font_sizes/font_size = 14
+
+[node name="StatsValue" type="Label" parent="VBox"]
+text = "Games 0 | W 0 / B 0 | Gammon 0 | Backgammon 0 | Avg turns 0 | Longest 0"
+theme_override_font_sizes/font_size = 12
+
+[node name="HistoryLabel" type="Label" parent="VBox"]
+text = "Move History:"
+theme_override_font_sizes/font_size = 14
+
+[node name="MoveHistoryList" type="ItemList" parent="VBox"]
+custom_minimum_size = Vector2(0, 120)
+size_flags_vertical = 3
+
 [node name="LegalMoves" type="ItemList" parent="VBox"]
+custom_minimum_size = Vector2(0, 150)
 size_flags_vertical = 3
 
 [node name="NewGameBtn" type="Button" parent="VBox"]
@@ -47,3 +73,15 @@ text = "End Turn"
 
 [node name="UndoBtn" type="Button" parent="VBox"]
 text = "Undo"
+
+[node name="TutorialBtn" type="Button" parent="VBox"]
+text = "Tutorial"
+
+[node name="SaveBtn" type="Button" parent="VBox"]
+text = "Save"
+
+[node name="LoadBtn" type="Button" parent="VBox"]
+text = "Load"
+
+[node name="SettingsBtn" type="Button" parent="VBox"]
+text = "Settings"

@@ -20,10 +20,15 @@ const PRIMING_GAME := "priming"
 const HOLDING_GAME := "holding"
 const BACK_GAME := "back_game"
 
-static func choose_move(state: Dictionary, dice_left: Array, bear_off: int) -> Dictionary:
+static func choose_move(state: Dictionary, dice_left: Array, bear_off: int, difficulty: String = "medium") -> Dictionary:
 	var moves = MoveValidator.compute_legal_moves(state, dice_left, bear_off)
 	if moves.is_empty():
 		return {}
+
+	var diff = difficulty.to_lower()
+	if diff == "easy":
+		# Easy: pick any legal move at random.
+		return moves[randi_range(0, moves.size() - 1)]
 	
 	# Check if this is opening (first few moves)
 	var roll_number = _estimate_roll_number(state)
@@ -44,6 +49,9 @@ static func choose_move(state: Dictionary, dice_left: Array, bear_off: int) -> D
 	var best_score = -1e9
 	for m in moves:
 		var score = _score_move(state, m, bear_off, phase, strategy, tactical_pattern)
+		# Medium: add slight randomness; Hard: raw score.
+		if diff == "medium":
+			score += randf_range(-5.0, 5.0)
 		if score > best_score:
 			best_score = score
 			best = m

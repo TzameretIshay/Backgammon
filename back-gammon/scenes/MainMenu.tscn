@@ -63,6 +63,48 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "2 Player Local"
 
+[node name="MatchLengthLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Match Length:"
+horizontal_alignment = 1
+
+[node name="MatchLengthOption" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+item_count = 6
+selected = 1
+popup/item_0/text = "3 Points"
+popup/item_0/id = 0
+popup/item_1/text = "5 Points"
+popup/item_1/id = 1
+popup/item_2/text = "7 Points"
+popup/item_2/id = 2
+popup/item_3/text = "11 Points"
+popup/item_3/id = 3
+popup/item_4/text = "15 Points"
+popup/item_4/id = 4
+popup/item_5/text = "21 Points"
+popup/item_5/id = 5
+
+[node name="DifficultyLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "AI Difficulty:"
+horizontal_alignment = 1
+
+[node name="DifficultyOption" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+item_count = 3
+selected = 1
+popup/item_0/text = "Easy"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Hard"
+popup/item_2/id = 2
+
 [node name="InfoLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14

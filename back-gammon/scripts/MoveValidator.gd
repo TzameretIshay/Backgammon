@@ -75,7 +75,15 @@ static func compute_legal_moves(state: Dictionary, dice_left: Array, bear_off: i
 				continue
 			if is_blocked(state, target, player):
 				continue
-			moves.append({"from": -1, "to": target, "die": die})
+			# Extra validation: double-check that target is truly not blocked before adding
+			var points_array: Array = state["points"]
+			if target >= 0 and target < points_array.size():
+				var dest_stack = points_array[target]
+				# Only add if point is empty, has own checkers, or has single opponent checker
+				if not (dest_stack[0] >= 2 and dest_stack[1] == opponent(player)):
+					moves.append({"from": -1, "to": target, "die": die})
+			else:
+				moves.append({"from": -1, "to": target, "die": die})
 		return moves
 
 	# Regular moves
@@ -219,3 +227,71 @@ static func apply_move(state: Dictionary, move: Dictionary) -> Dictionary:
 		dest[1] = player
 
 	return {"state": new_state, "hit_point": hit_point}
+
+
+static func calculate_pip_count(state: Dictionary, player: int) -> int:
+	"""
+	Calculate pip count (race distance) for a player.
+	Sum of (point_distance_to_home * checker_count) for all checkers.
+	"""
+	var total_pips := 0
+	var points: Array = state["points"]
+	var bar_count: int = state["bar"][color_key(player)]
+	
+	# Checkers on bar: 25 pips each (furthest possible)
+	total_pips += bar_count * 25
+	
+	# Checkers on board
+	for point_idx in range(24):
+		var checker_count: int = points[point_idx][0]
+		var checker_color: int = points[point_idx][1]
+		
+		if checker_count > 0 and checker_color == player:
+			var distance_to_bear_off: int
+			if player == WHITE:
+				# White bears off from point 0, so distance is (point + 1)
+				distance_to_bear_off = point_idx + 1
+			else:
+				# Black bears off from point 23, so distance is (24 - point)
+				distance_to_bear_off = 24 - point_idx
+			
+			total_pips += checker_count * distance_to_bear_off
+	
+	return total_pips
+
+
+static func calculate_win_multiplier(state: Dictionary, winner: int) -> int:
+	"""
+	Calculate point multiplier for the win:
+	- Normal win: 1x
+	- Gammon (opponent has 0 borne off): 2x
+	- Backgammon (opponent has checkers in winner's home or on bar): 3x
+	"""
+	var loser := opponent(winner)
+	var loser_borne_off: int = state["bear_off"][color_key(loser)]
+	
+	# Normal win
+	if loser_borne_off > 0:
+		return 1
+	
+	# Check for backgammon: loser has checkers in winner's home or on bar
+	var loser_on_bar: int = state["bar"][color_key(loser)]
+	if loser_on_bar > 0:
+		return 3  # Backgammon
+	
+	# Check if loser has checkers in winner's home board
+	var points: Array = state["points"]
+	var winner_home_range: Array
+	if winner == WHITE:
+		winner_home_range = range(0, 6)  # Points 0-5
+	else:
+		winner_home_range = range(18, 24)  # Points 18-23
+	
+	for point_idx in winner_home_range:
+		var checker_count: int = points[point_idx][0]
+		var checker_color: int = points[point_idx][1]
+		if checker_count > 0 and checker_color == loser:
+			return 3  # Backgammon
+	
+	# Gammon: opponent hasn't borne off any checkers
+	return 2

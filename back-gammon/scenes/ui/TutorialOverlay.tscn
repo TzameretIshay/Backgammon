@@ -1,0 +1,75 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/TutorialOverlay.gd" id="1"]
+
+[node name="TutorialOverlay" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+visible = false
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.45)
+
+[node name="HighlightRect" type="ColorRect" parent="."]
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 700.0
+offset_bottom = 440.0
+color = Color(1, 0.85, 0.2, 0.25)
+visible = false
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 0
+anchor_left = 0.6
+anchor_top = 0.04
+anchor_right = 0.95
+anchor_bottom = 0.38
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 12.0
+margin_top = 12.0
+margin_right = -12.0
+margin_bottom = -12.0
+custom_minimum_size = Vector2(0, 160)
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+text = "Tutorial"
+theme_override_font_sizes/font_size = 20
+
+[node name="BodyLabel" type="Label" parent="Panel/VBox"]
+text = "Follow the prompts to learn the controls."
+autowrap_mode = 3
+
+[node name="StepLabel" type="Label" parent="Panel/VBox"]
+text = "Step 1/4"
+
+[node name="Buttons" type="HBoxContainer" parent="Panel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="Panel/VBox/Buttons"]
+text = "Back"
+
+[node name="NextButton" type="Button" parent="Panel/VBox/Buttons"]
+text = "Next"
+
+[node name="SkipButton" type="Button" parent="Panel/VBox/Buttons"]
+text = "Skip"
+
+[node name="ReplayButton" type="Button" parent="Panel/VBox/Buttons"]
+text = "Replay"

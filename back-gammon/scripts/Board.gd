@@ -29,6 +29,16 @@ var _hit_flash_point := -1
 var _hit_flash_time := 0.0
 var _selected_point := -1  # Track which point's checker is selected
 var _has_selection := false  # True when a checker is selected (board or bar)
+var _anim_speed: float = 1.0
+
+# Theme colors (mutable via settings)
+var _col_board_bg := Color(0.2, 0.25, 0.35)
+var _col_play_area := Color(0.5, 0.6, 0.75)
+var _col_point_a := Color(0.72, 0.48, 0.28)
+var _col_point_b := Color(0.9, 0.7, 0.45)
+var _col_bar := Color(0.25, 0.25, 0.3, 0.3)
+var _col_bearoff := Color(0.2, 0.6, 0.2, 0.25)
+var _col_highlight := Color(0.0, 1.0, 1.0, 0.8)
 
 func _ready() -> void:
 	_checkers_root = Node2D.new()
@@ -245,25 +255,23 @@ func _input(event: InputEvent) -> void:
 
 
 func _get_checker_at_position(pos: Vector2) -> int:
-	# Check if position is within 20 pixels of any checker
+	# Prefer bar checkers so re-entry is easy to select
+	var bar_radius := 24.0
+	for checker in _bar_white:
+		if pos.distance_to(checker.global_position) <= bar_radius:
+			return -1  # Bar selection
+	for checker in _bar_black:
+		if pos.distance_to(checker.global_position) <= bar_radius:
+			return -1  # Bar selection
+
+	# Then check board checkers
+	var board_radius := 20.0
 	for idx in _checker_nodes.keys():
 		var checkers = _checker_nodes[idx]
 		for checker in checkers:
-			var dist = pos.distance_to(checker.global_position)
-			if dist <= 20:
+			if pos.distance_to(checker.global_position) <= board_radius:
 				return idx
-	
-	# Check bar checkers
-	for checker in _bar_white:
-		var dist = pos.distance_to(checker.global_position)
-		if dist <= 20:
-			return -1  # Bar position
-	
-	for checker in _bar_black:
-		var dist = pos.distance_to(checker.global_position)
-		if dist <= 20:
-			return -1  # Bar position
-	
+
 	return -99  # No checker found
 
 
@@ -277,9 +285,28 @@ func play_move_animation(from_point: int, to_point: int, color: int, hit_point: 
 		_animating = false
 		return
 
+	var start_pos := checker.global_position
 	var dest_pos := _target_position_for_point(to_point, color, new_state)
+	
+	# Create arc path for checker movement
+	var distance = start_pos.distance_to(dest_pos)
+	var mid_point = (start_pos + dest_pos) / 2.0
+	var arc_height = min(distance * 0.3, 100.0)  # Arc proportional to distance
+	mid_point.y -= arc_height  # Lift checker up in an arc
+	
 	var tw = create_tween()
-	tw.tween_property(checker, "global_position", dest_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	tw.set_parallel(false)
+	
+	# Move up in an arc (2-step bezier-like path)
+	var dur_arc: float = 0.15 / max(_anim_speed, 0.01)
+	tw.tween_property(checker, "global_position", mid_point, dur_arc).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(checker, "global_position", dest_pos, dur_arc).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
+	# Small bounce/settle effect
+	var dur_bounce: float = 0.05 / max(_anim_speed, 0.01)
+	tw.tween_property(checker, "scale", Vector2(1.1, 0.9), dur_bounce)
+	tw.tween_property(checker, "scale", Vector2.ONE, dur_bounce)
+	
 	tw.chain().tween_callback(Callable(self, "_apply_post_animation_state").bind(new_state))
 
 	if hit_point != -1:
@@ -396,15 +423,31 @@ func _locate_target_from_highlights(world_pos: Vector2) -> int:
 	return best_idx
 
 
+func set_animation_speed(speed: float) -> void:
+	_anim_speed = max(speed, 0.1)
+
+
+func apply_theme(theme: Dictionary) -> void:
+	# Expected keys: board_bg, play_area, point_a, point_b, bar, bearoff, highlight
+	_col_board_bg = theme.get("board_bg", _col_board_bg)
+	_col_play_area = theme.get("play_area", _col_play_area)
+	_col_point_a = theme.get("point_a", _col_point_a)
+	_col_point_b = theme.get("point_b", _col_point_b)
+	_col_bar = theme.get("bar", _col_bar)
+	_col_bearoff = theme.get("bearoff", _col_bearoff)
+	_col_highlight = theme.get("highlight", _col_highlight)
+	queue_redraw()
+
+
 func _draw() -> void:
 	# Background
-	draw_rect(Rect2(Vector2.ZERO, Vector2(1600, 1000)), Color(0.2, 0.25, 0.35))
+	draw_rect(Rect2(Vector2.ZERO, Vector2(1600, 1000)), _col_board_bg)
 	
 	# Board play area
 	var margin = 20.0
 	var board_w = 600.0
 	var board_h = 400.0
-	draw_rect(Rect2(margin, margin, board_w, board_h), Color(0.5, 0.6, 0.75))
+	draw_rect(Rect2(margin, margin, board_w, board_h), _col_play_area)
 	
 	# Draw triangles
 	var triangle_width = 23.0  # Half-width of triangle base
@@ -413,7 +456,7 @@ func _draw() -> void:
 	for i in range(_point_positions.size()):
 		var p = _point_positions[i]
 		# Alternate colors
-		var col = Color(0.72, 0.48, 0.28) if i % 2 == 0 else Color(0.9, 0.7, 0.45)
+		var col = _col_point_a if i % 2 == 0 else _col_point_b
 		
 		# Bottom triangles (0-11) have base at bottom edge, point UP toward center
 		# Top triangles (12-23) have base at top edge, point DOWN toward center
@@ -432,15 +475,15 @@ func _draw() -> void:
 			var tri = PackedVector2Array([left_base, right_base, tip])
 			draw_polygon(tri, [col, col, col])
 	
-	draw_rect(_bar_rect, Color(0.25, 0.25, 0.3, 0.3), false, 2)
-	draw_rect(_bearoff_rect, Color(0.2, 0.6, 0.2, 0.25), false, 2)
+	draw_rect(_bar_rect, _col_bar, false, 2)
+	draw_rect(_bearoff_rect, _col_bearoff, false, 2)
 
 	for h in _highlight_points:
 		if h < 0 or h >= _point_positions.size():
 			continue
 		var hp = _point_positions[h]
-		draw_circle(hp, 25, Color(0.0, 1.0, 1.0, 0.8))  # Brighter cyan
-		draw_circle(hp, 23, Color(0.0, 1.0, 1.0, 0.4))  # Inner circle
+		draw_circle(hp, 25, _col_highlight)
+		draw_circle(hp, 23, Color(_col_highlight.r, _col_highlight.g, _col_highlight.b, _col_highlight.a * 0.5))
 	if _highlight_bearoff:
 		draw_rect(_bearoff_rect, Color(0.2, 0.8, 0.2, 0.35), true)
 
@@ -448,5 +491,9 @@ func _draw() -> void:
 		if _hit_flash_point >= 0 and _hit_flash_point < _point_positions.size():
 			var hp_flash = _point_positions[_hit_flash_point]
 			var t = clamp(_hit_flash_time / HIT_FLASH_DURATION, 0.0, 1.0)
-			var alpha = 0.65 * t
-			draw_circle(hp_flash, 30, Color(1, 0.2, 0.2, alpha))
+			# Pulsing effect with multiple rings
+			var alpha1 = 0.8 * t
+			var alpha2 = 0.5 * t
+			draw_circle(hp_flash, 35, Color(1, 0.1, 0.1, alpha1))
+			draw_circle(hp_flash, 30, Color(1, 0.3, 0.1, alpha2))
+			draw_circle(hp_flash, 25, Color(1, 0.5, 0.2, alpha1 * 0.7))

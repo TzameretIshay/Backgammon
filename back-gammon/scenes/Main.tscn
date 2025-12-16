@@ -1,18 +1,80 @@
-[gd_scene load_steps=5 format=3 uid="uid://chnxdknnr78rq"]
+[gd_scene load_steps=8 format=3 uid="uid://chnxdknnr78rq"]
 
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/Board.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/Dice.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/UI.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/DoublingCubeUI.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SettingsPopup.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TutorialOverlay.tscn" id="6"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1")
 board_path = NodePath("Board")
 dice_path = NodePath("DiceUI")
 ui_path = NodePath("UI")
+doubling_cube_path = NodePath("DoublingCubeUI")
 
 [node name="Board" parent="." instance=ExtResource("2")]
 
 [node name="UI" parent="." instance=ExtResource("4")]
 
 [node name="DiceUI" parent="." instance=ExtResource("3")]
+
+[node name="DoublingCubeUI" type="Control" parent="."]
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 700.0
+offset_top = 400.0
+offset_right = 900.0
+offset_bottom = 600.0
+script = ExtResource("5")
+
+[node name="VBox" type="VBoxContainer" parent="DoublingCubeUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="CubeLabel" type="Label" parent="DoublingCubeUI/VBox"]
+text = "Cube: 1"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="OwnerLabel" type="Label" parent="DoublingCubeUI/VBox"]
+text = "Owner: Center"
+horizontal_alignment = 1
+
+[node name="DoubleBtn" type="Button" parent="DoublingCubeUI/VBox"]
+text = "Double"
+
+[node name="CubeOfferDialog" type="AcceptDialog" parent="DoublingCubeUI"]
+title = "Doubling Cube Offered"
+size = Vector2i(300, 150)
+
+[node name="VBox" type="VBoxContainer" parent="DoublingCubeUI/CubeOfferDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 292.0
+offset_bottom = 142.0
+
+[node name="OfferLabel" type="Label" parent="DoublingCubeUI/CubeOfferDialog/VBox"]
+text = "White offers to double the stakes to 2!"
+
+[node name="HBox" type="HBoxContainer" parent="DoublingCubeUI/CubeOfferDialog/VBox"]
+size_flags_horizontal = 4
+
+[node name="AcceptBtn" type="Button" parent="DoublingCubeUI/CubeOfferDialog/VBox/HBox"]
+text = "Accept"
+
+[node name="DeclineBtn" type="Button" parent="DoublingCubeUI/CubeOfferDialog/VBox/HBox"]
+text = "Decline (Forfeit)"
+
+[node name="TutorialOverlay" parent="." instance=ExtResource("6")]
+roll_button_path = NodePath("../DiceUI/RollButton")
+board_highlight_rect = Rect2(20, 20, 680, 420)
+bearoff_highlight_rect = Rect2(640, 70, 70, 320)
+
+[node name="SettingsPopup" parent="." instance=ExtResource("7")]

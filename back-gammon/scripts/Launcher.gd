@@ -21,14 +21,14 @@ func _ready() -> void:
 		_set_game_visibility(false)
 
 
-func _on_mode_selected(mode: String) -> void:
+func _on_mode_selected(mode: String, match_length: int = 5, difficulty: String = "Medium") -> void:
 	if _menu:
 		_menu.visible = false
 	
 	if _game:
 		_set_game_visibility(true)
 		if _game.has_method("start_game_with_mode"):
-			_game.start_game_with_mode(mode)
+			_game.start_game_with_mode(mode, match_length, difficulty)
 
 
 func show_menu() -> void:
