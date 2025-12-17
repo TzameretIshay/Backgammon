@@ -10,23 +10,27 @@ signal tutorial_pressed
 signal save_pressed
 signal load_pressed
 signal settings_pressed
+signal return_to_menu_pressed
+signal return_to_menu_confirmed
 
-@onready var status_label: Label = $VBox/StatusLabel
-@onready var player_label: Label = $VBox/PlayerLabel
-@onready var roll_label: Label = $VBox/RollLabel
-@onready var pip_count_label: Label = $VBox/PipCountLabel
-@onready var match_score_label: Label = $VBox/MatchScoreLabel
-@onready var history_list: ItemList = $VBox/MoveHistoryList
-@onready var moves_list: ItemList = $VBox/LegalMoves
-@onready var new_game_btn: Button = $VBox/NewGameBtn
-@onready var end_turn_btn: Button = $VBox/EndTurnBtn
-@onready var undo_btn: Button = $VBox/UndoBtn
-@onready var tutorial_btn: Button = $VBox/TutorialBtn
-@onready var save_btn: Button = $VBox/SaveBtn
-@onready var load_btn: Button = $VBox/LoadBtn
-@onready var settings_btn: Button = $VBox/SettingsBtn
-@onready var stats_label: Label = $VBox/StatsLabel
-@onready var stats_value: Label = $VBox/StatsValue
+@onready var status_label: Label = $ScrollContainer/VBox/StatusLabel
+@onready var player_label: Label = $ScrollContainer/VBox/PlayerLabel
+@onready var roll_label: Label = $ScrollContainer/VBox/RollLabel
+@onready var pip_count_label: Label = $ScrollContainer/VBox/PipCountLabel
+@onready var match_score_label: Label = $ScrollContainer/VBox/MatchScoreLabel
+@onready var history_list: ItemList = $ScrollContainer/VBox/MoveHistoryList
+@onready var moves_list: ItemList = $ScrollContainer/VBox/LegalMoves
+@onready var new_game_btn: Button = $ScrollContainer/VBox/NewGameBtn
+@onready var end_turn_btn: Button = $ScrollContainer/VBox/EndTurnBtn
+@onready var undo_btn: Button = $ScrollContainer/VBox/UndoBtn
+@onready var tutorial_btn: Button = $ScrollContainer/VBox/TutorialBtn
+@onready var save_btn: Button = $ScrollContainer/VBox/SaveBtn
+@onready var load_btn: Button = $ScrollContainer/VBox/LoadBtn
+@onready var settings_btn: Button = $ScrollContainer/VBox/SettingsBtn
+@onready var return_to_menu_btn: Button = $ScrollContainer/VBox/ReturnToMenuBtn
+@onready var forfeit_confirmation: ConfirmationDialog = $ForfeitConfirmation
+@onready var stats_label: Label = $ScrollContainer/VBox/StatsLabel
+@onready var stats_value: Label = $ScrollContainer/VBox/StatsValue
 
 func _ready() -> void:
 	if new_game_btn:
@@ -43,6 +47,10 @@ func _ready() -> void:
 		load_btn.pressed.connect(func(): load_pressed.emit())
 	if settings_btn:
 		settings_btn.pressed.connect(func(): settings_pressed.emit())
+	if return_to_menu_btn:
+		return_to_menu_btn.pressed.connect(_on_return_to_menu_pressed)
+	if forfeit_confirmation:
+		forfeit_confirmation.confirmed.connect(func(): return_to_menu_confirmed.emit())
 	set_status("Welcome. Press New Game.")
 	show_legal_moves([])
 	update_stats({})
@@ -118,3 +126,9 @@ func update_stats(stats: Dictionary) -> void:
 	stats_value.text = "Games %d | W %d / B %d | Gammon %d | Backgammon %d | Avg turns %d | Longest %d" % [
 		games, white_wins, black_wins, gammons, backgammons, avg_turns, longest
 	]
+
+
+func _on_return_to_menu_pressed() -> void:
+	"""Show forfeit confirmation dialog when return to menu is clicked."""
+	if forfeit_confirmation:
+		forfeit_confirmation.popup_centered_ratio(0.4)

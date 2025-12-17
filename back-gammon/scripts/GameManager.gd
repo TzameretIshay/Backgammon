@@ -115,6 +115,10 @@ func _resolve_children() -> void:
 			_ui.connect("load_pressed", Callable(self, "_on_load_pressed"))
 		if _ui.has_signal("settings_pressed"):
 			_ui.connect("settings_pressed", Callable(self, "_show_settings"))
+		if _ui.has_signal("return_to_menu_pressed"):
+			_ui.connect("return_to_menu_pressed", Callable(self, "_on_return_to_menu"))
+		if _ui.has_signal("return_to_menu_confirmed"):
+			_ui.connect("return_to_menu_confirmed", Callable(self, "_on_return_to_menu_confirmed"))
 	if _doubling_cube_ui:
 		if _doubling_cube_ui.has_signal("double_offered"):
 			_doubling_cube_ui.connect("double_offered", Callable(self, "_on_double_offered"))
@@ -614,6 +618,21 @@ func _on_settings_applied(payload: Dictionary) -> void:
 func _on_settings_closed() -> void:
 	if _ui and _ui.has_method("set_status"):
 		_ui.set_status("Settings closed.")
+
+
+func _on_return_to_menu() -> void:
+	"""Handle return to menu request - show confirmation dialog to player."""
+	# Dialog is shown by UI, we wait for confirmation
+	pass
+
+
+func _on_return_to_menu_confirmed() -> void:
+	"""Handle confirmed return to menu after forfeit warning - call Launcher to show menu."""
+	var launcher = get_tree().root.get_child(0)
+	if launcher and launcher.has_method("show_menu"):
+		launcher.call("show_menu")
+	else:
+		push_warning("Could not find Launcher or show_menu method")
 
 
 func _apply_settings_to_runtime() -> void:

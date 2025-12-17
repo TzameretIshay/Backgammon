@@ -36,6 +36,14 @@ func show_menu() -> void:
 		_menu.visible = true
 	if _game:
 		_set_game_visibility(false)
+		# Reset game state by calling new_game on GameManager
+		var game_manager = _game.get_child(0) if _game.get_child_count() > 0 else null
+		if game_manager and game_manager.has_method("new_game"):
+			game_manager.call("new_game")
+		# Update UI status
+		var ui = _game.get_node_or_null("UI")
+		if ui and ui.has_method("set_status"):
+			ui.call("set_status", "Returned to menu. Select a game mode to continue.")
 
 
 func _set_game_visibility(is_visible: bool) -> void:

@@ -20,17 +20,26 @@ doubling_cube_path = NodePath("DoublingCubeUI")
 [node name="UI" parent="." instance=ExtResource("4")]
 
 [node name="DiceUI" parent="." instance=ExtResource("3")]
+anchors_preset = 0
+anchor_left = 0.18
+anchor_top = 0.8
+anchor_right = 0.42
+anchor_bottom = 0.9
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 
 [node name="DoublingCubeUI" type="Control" parent="."]
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 700.0
-offset_top = 400.0
-offset_right = 900.0
-offset_bottom = 600.0
+anchor_left = 0.45
+anchor_top = 0.8
+anchor_right = 0.68
+anchor_bottom = 0.95
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 script = ExtResource("5")
 
 [node name="VBox" type="VBoxContainer" parent="DoublingCubeUI"]
